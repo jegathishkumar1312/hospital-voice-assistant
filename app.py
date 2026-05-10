@@ -1,110 +1,152 @@
 import streamlit as st
-import json
 import speech_recognition as sr
+import json
+import os
 from datetime import datetime
 
-# Load hospital data
-with open("hospital_data.json", "r") as file:
-    hospital_data = json.load(file)
+# ---------------- PAGE SETTINGS ---------------- #
 
-# Load transcripts
-try:
-    with open("transcripts.json", "r") as file:
-        transcripts = json.load(file)
-except:
-    transcripts = []
-
-# Page settings
 st.set_page_config(page_title="Hospital Voice Helpdesk")
 
-# Title
-st.title("Hospital Voice Helpdesk")
+st.title("Hospital Voice Helpdesk (NLP System)")
+st.write("Voice + NLP powered hospital assistant")
 
-# Description
-st.write("Voice-enabled hospital helpdesk system")
+# ---------------- DOMAIN DATABASE ---------------- #
 
-st.divider()
+hospital_data = {
+    "icu": "ICU is located on 2nd floor, Block A",
+    "pharmacy": "Pharmacy is near reception",
+    "op": "OP department is on ground floor",
+    "emergency": "Emergency ward is open 24/7",
+    "cardiology": "Cardiology department is in Block B",
+    "radiology": "Radiology department is in Block C",
+    "lab": "Laboratory is on 1st floor"
+}
 
-# Session state for voice input
-if "question" not in st.session_state:
-    st.session_state.question = ""
+# ---------------- TRANSCRIPT STORAGE ---------------- #
 
-# Text input
-question = st.text_input(
-    "Enter your hospital question",
-    value=st.session_state.question
-)
+def save_transcript(query, intent, answer):
 
-# Voice input button
-if st.button("Use Voice Input"):
+    data = {
+        "query": query,
+        "intent": intent,
+        "answer": answer,
+        "time": str(datetime.now())
+    }
+
+    if os.path.exists("transcripts.json"):
+
+        try:
+            with open("transcripts.json", "r") as f:
+                chats = json.load(f)
+
+        except:
+            chats = []
+
+    else:
+        chats = []
+
+    chats.append(data)
+
+    with open("transcripts.json", "w") as f:
+        json.dump(chats, f, indent=4)
+
+# ---------------- VOICE RECOGNITION ---------------- #
+
+def recognize_voice():
 
     recognizer = sr.Recognizer()
 
-    try:
-        with sr.Microphone() as source:
+    with sr.Microphone() as source:
 
-            st.info("Listening... Speak now")
+        st.info("Speak now...")
 
-            audio = recognizer.listen(source)
+        audio = recognizer.listen(source)
 
-            voice_text = recognizer.recognize_google(audio)
+        try:
+            text = recognizer.recognize_google(audio)
+            return text.lower()
 
-            # Save voice text
-            st.session_state.question = voice_text
+        except:
+            return ""
 
-            st.success(f"You said: {voice_text}")
+# ---------------- SESSION STATE ---------------- #
 
-    except:
-        st.error("Microphone or voice recognition error")
+if "user_query" not in st.session_state:
+    st.session_state.user_query = ""
 
-# Ask button
+# ---------------- TEXT INPUT ---------------- #
+
+user_input = st.text_input(
+    "Enter your hospital question",
+    value=st.session_state.user_query
+)
+
+# ---------------- VOICE BUTTON ---------------- #
+
+if st.button("Voice Input"):
+
+    voice_text = recognize_voice()
+
+    if voice_text != "":
+
+        st.session_state.user_query = voice_text
+
+        st.success(f"You said: {voice_text}")
+
+        st.rerun()
+
+    else:
+        st.error("Could not recognize voice")
+
+# ---------------- ASK BUTTON ---------------- #
+
 if st.button("Ask"):
 
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    query = user_input.lower().strip()
 
-    answer = "Sorry, information not available"
+    intent = "unknown"
 
-    # Use typed question first
-    question = question.lower().strip()
-
-    # If text box empty, use voice input
-    if question == "":
-        question = st.session_state.question.lower().strip()
-
-    # Search hospital data
+    # NLP Intent Detection
     for key in hospital_data:
 
-        if key.lower() in question:
-
-            answer = hospital_data[key]
+        if key.lower() in query:
+            intent = key
             break
 
-    # Display answer
+    # Response Generation
+    answer = hospital_data.get(
+        intent,
+        "Sorry, information not available"
+    )
+
+    # Save Transcript
+    save_transcript(query, intent, answer)
+
+    # Display Output
     st.success(answer)
 
-    # Display timestamp
-    st.info(f"Time: {current_time}")
+    st.write(f"Intent: {intent}")
+    st.write(f"Time: {datetime.now()}")
 
-    # Save transcript
-    chat = {
-        "question": question,
-        "answer": answer,
-        "time": current_time
-    }
+# ---------------- TRANSCRIPT REPLAY ---------------- #
 
-    transcripts.append(chat)
-
-    with open("transcripts.json", "w") as file:
-        json.dump(transcripts, file, indent=4)
-
-st.divider()
-
-# Show transcripts
 st.subheader("Previous Transcripts")
 
-for chat in transcripts:
+if os.path.exists("transcripts.json"):
 
-    st.write(f"Question: {chat['question']}")
-    st.write(f"Answer: {chat['answer']}")
-    st.write(f"Time: {chat['time']}")
-    st.write("-----------------------------")
+    try:
+
+        with open("transcripts.json", "r") as f:
+            chats = json.load(f)
+
+        for chat in reversed(chats):
+
+            st.write(f"Q: {chat['query']}")
+            st.write(f"Intent: {chat['intent']}")
+            st.write(f"A: {chat['answer']}")
+            st.write(f"Time: {chat['time']}")
+            st.write("---")
+
+    except:
+        st.error("Transcript file is corrupted")

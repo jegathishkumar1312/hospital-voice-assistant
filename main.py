@@ -1,9 +1,10 @@
 import json
 from fastapi import FastAPI
+from nlp_engine import get_intent
 
 app = FastAPI()
 
-# Load hospital data from JSON
+# Load hospital data
 with open("hospital_data.json", "r") as file:
     hospital_data = json.load(file)
 
@@ -13,8 +14,20 @@ def home():
 
 @app.get("/ask")
 def ask(query: str):
-    query = query.lower()
-    for key in hospital_data:
-        if key in query:
-            return {"answer": hospital_data[key]}
-    return {"answer": "Sorry, information not available"}
+
+    query = query.lower().strip()
+
+    if query == "":
+        return {"answer": "Empty input", "intent": "none"}
+
+    # NLP INTENT DETECTION
+    intent = get_intent(query)
+
+    # RESPONSE
+    answer = hospital_data.get(intent, "Sorry, information not available")
+
+    return {
+        "query": query,
+        "intent": intent,
+        "answer": answer
+    }
