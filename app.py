@@ -64,20 +64,28 @@ voice_text = speech_to_text(
     key="voice_input"
 )
 
+# ---------------- EXTRACT ACTUAL TEXT ---------------- #
+
+if voice_text:
+
+    if isinstance(voice_text, dict):
+        extracted_text = voice_text.get("text", "").lower()
+
+    else:
+        extracted_text = str(voice_text).lower()
+
+else:
+    extracted_text = ""
+
 # ---------------- DEBUG DISPLAY ---------------- #
 
-st.write("Voice Text:", voice_text)
+st.write("Extracted Voice Text:", extracted_text)
 
 # ---------------- TEXT INPUT ---------------- #
 
-if voice_text:
-    default_text = str(voice_text).lower()
-else:
-    default_text = ""
-
 user_input = st.text_input(
     "Enter your hospital question",
-    value=default_text
+    value=extracted_text
 )
 
 # ---------------- ASK BUTTON ---------------- #
