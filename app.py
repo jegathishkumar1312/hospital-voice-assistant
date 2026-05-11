@@ -51,41 +51,49 @@ def save_transcript(query, intent, answer):
     with open("transcripts.json", "w") as f:
         json.dump(chats, f, indent=4)
 
+# ---------------- SESSION STATE ---------------- #
+
+if "query_text" not in st.session_state:
+    st.session_state.query_text = ""
+
 # ---------------- VOICE INPUT ---------------- #
 
 st.subheader("Voice Input")
 
-voice_text = speech_to_text(
+voice_result = speech_to_text(
     language="en",
-    start_prompt="Start Recording",
-    stop_prompt="Stop Recording",
+    start_prompt="🎤 Start Recording",
+    stop_prompt="⏹ Stop Recording",
     use_container_width=True,
     just_once=True,
-    key="voice_input"
+    key="voice"
 )
 
-# ---------------- EXTRACT ACTUAL TEXT ---------------- #
+# ---------------- PROCESS VOICE ---------------- #
 
-if voice_text:
+if voice_result:
 
-    if isinstance(voice_text, dict):
-        extracted_text = voice_text.get("text", "").lower()
+    if isinstance(voice_result, dict):
+
+        spoken_text = voice_result.get("text", "")
 
     else:
-        extracted_text = str(voice_text).lower()
 
-else:
-    extracted_text = ""
+        spoken_text = str(voice_result)
 
-# ---------------- DEBUG DISPLAY ---------------- #
+    spoken_text = spoken_text.lower().strip()
 
-st.write("Extracted Voice Text:", extracted_text)
+    if spoken_text != "":
+
+        st.session_state.query_text = spoken_text
+
+        st.success(f"Voice Detected: {spoken_text}")
 
 # ---------------- TEXT INPUT ---------------- #
 
 user_input = st.text_input(
     "Enter your hospital question",
-    value=extracted_text
+    value=st.session_state.query_text
 )
 
 # ---------------- ASK BUTTON ---------------- #
@@ -94,52 +102,67 @@ if st.button("Ask"):
 
     query = user_input.lower().strip()
 
-    st.write("Processed Query:", query)
+    # prevent empty queries
 
-    intent = "unknown"
+    if query == "":
 
-    # ---------------- IMPROVED NLP MATCHING ---------------- #
+        st.error("Please enter or speak a query")
 
-    if "icu" in query or "i see you" in query:
-        intent = "icu"
+    else:
 
-    elif "pharmacy" in query:
-        intent = "pharmacy"
+        intent = "unknown"
 
-    elif "emergency" in query:
-        intent = "emergency"
+        # ---------------- NLP MATCHING ---------------- #
 
-    elif "op" in query:
-        intent = "op"
+        if (
+            "icu" in query
+            or "i see you" in query
+        ):
+            intent = "icu"
 
-    elif "cardiology" in query:
-        intent = "cardiology"
+        elif "pharmacy" in query:
+            intent = "pharmacy"
 
-    elif "radiology" in query:
-        intent = "radiology"
+        elif "emergency" in query:
+            intent = "emergency"
 
-    elif "lab" in query or "laboratory" in query:
-        intent = "lab"
+        elif (
+            "op" in query
+            or "outpatient" in query
+        ):
+            intent = "op"
 
-    # ---------------- RESPONSE ---------------- #
+        elif "cardiology" in query:
+            intent = "cardiology"
 
-    answer = hospital_data.get(
-        intent,
-        "Sorry, information not available"
-    )
+        elif "radiology" in query:
+            intent = "radiology"
 
-    # ---------------- SAVE TRANSCRIPT ---------------- #
+        elif (
+            "lab" in query
+            or "laboratory" in query
+        ):
+            intent = "lab"
 
-    save_transcript(query, intent, answer)
+        # ---------------- RESPONSE ---------------- #
 
-    # ---------------- DISPLAY OUTPUT ---------------- #
+        answer = hospital_data.get(
+            intent,
+            "Sorry, information not available"
+        )
 
-    st.success(answer)
+        # ---------------- SAVE ---------------- #
 
-    st.write(f"Intent: {intent}")
-    st.write(f"Time: {datetime.now()}")
+        save_transcript(query, intent, answer)
 
-# ---------------- TRANSCRIPT REPLAY ---------------- #
+        # ---------------- OUTPUT ---------------- #
+
+        st.success(answer)
+
+        st.write(f"Intent: {intent}")
+        st.write(f"Time: {datetime.now()}")
+
+# ---------------- TRANSCRIPT HISTORY ---------------- #
 
 st.subheader("Previous Transcripts")
 
@@ -150,13 +173,12 @@ if os.path.exists("transcripts.json"):
         with open("transcripts.json", "r") as f:
             chats = json.load(f)
 
-        for chat in reversed(chats):
+        for chat in reversed(chats[-10:]):
 
             st.write(f"Q: {chat['query']}")
             st.write(f"Intent: {chat['intent']}")
             st.write(f"A: {chat['answer']}")
-            st.write(f"Time: {chat['time']}")
             st.write("---")
 
     except:
-        st.error("Transcript file is corrupted")
+        st.error("Transcript file error")
