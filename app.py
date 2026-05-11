@@ -1,5 +1,5 @@
 import streamlit as st
-import speech_recognition as sr
+from streamlit_mic_recorder import speech_to_text
 import json
 import os
 from datetime import datetime
@@ -51,53 +51,25 @@ def save_transcript(query, intent, answer):
     with open("transcripts.json", "w") as f:
         json.dump(chats, f, indent=4)
 
-# ---------------- VOICE RECOGNITION ---------------- #
+# ---------------- VOICE INPUT ---------------- #
 
-def recognize_voice():
+st.subheader("Voice Input")
 
-    recognizer = sr.Recognizer()
-
-    with sr.Microphone() as source:
-
-        st.info("Speak now...")
-
-        audio = recognizer.listen(source)
-
-        try:
-            text = recognizer.recognize_google(audio)
-            return text.lower()
-
-        except:
-            return ""
-
-# ---------------- SESSION STATE ---------------- #
-
-if "user_query" not in st.session_state:
-    st.session_state.user_query = ""
+voice_text = speech_to_text(
+    language="en",
+    start_prompt="Start Recording",
+    stop_prompt="Stop Recording",
+    use_container_width=True,
+    just_once=True,
+    key="voice_input"
+)
 
 # ---------------- TEXT INPUT ---------------- #
 
 user_input = st.text_input(
     "Enter your hospital question",
-    value=st.session_state.user_query
+    value=voice_text if voice_text else ""
 )
-
-# ---------------- VOICE BUTTON ---------------- #
-
-if st.button("Voice Input"):
-
-    voice_text = recognize_voice()
-
-    if voice_text != "":
-
-        st.session_state.user_query = voice_text
-
-        st.success(f"You said: {voice_text}")
-
-        st.rerun()
-
-    else:
-        st.error("Could not recognize voice")
 
 # ---------------- ASK BUTTON ---------------- #
 
