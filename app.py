@@ -79,23 +79,42 @@ if st.button("Ask"):
 
     intent = "unknown"
 
-    # NLP Intent Detection
-    for key in hospital_data:
+    # ---------------- IMPROVED NLP MATCHING ---------------- #
 
-        if key.lower() in query:
-            intent = key
-            break
+    if "icu" in query or "i see you" in query:
+        intent = "icu"
 
-    # Response Generation
+    elif "pharmacy" in query:
+        intent = "pharmacy"
+
+    elif "emergency" in query:
+        intent = "emergency"
+
+    elif "op" in query:
+        intent = "op"
+
+    elif "cardiology" in query:
+        intent = "cardiology"
+
+    elif "radiology" in query:
+        intent = "radiology"
+
+    elif "lab" in query or "laboratory" in query:
+        intent = "lab"
+
+    # ---------------- RESPONSE ---------------- #
+
     answer = hospital_data.get(
         intent,
         "Sorry, information not available"
     )
 
-    # Save Transcript
+    # ---------------- SAVE TRANSCRIPT ---------------- #
+
     save_transcript(query, intent, answer)
 
-    # Display Output
+    # ---------------- DISPLAY OUTPUT ---------------- #
+
     st.success(answer)
 
     st.write(f"Intent: {intent}")
