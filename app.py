@@ -64,11 +64,20 @@ voice_text = speech_to_text(
     key="voice_input"
 )
 
+# ---------------- DEBUG DISPLAY ---------------- #
+
+st.write("Voice Text:", voice_text)
+
 # ---------------- TEXT INPUT ---------------- #
+
+if voice_text:
+    default_text = str(voice_text).lower()
+else:
+    default_text = ""
 
 user_input = st.text_input(
     "Enter your hospital question",
-    value=voice_text if voice_text else ""
+    value=default_text
 )
 
 # ---------------- ASK BUTTON ---------------- #
@@ -76,6 +85,8 @@ user_input = st.text_input(
 if st.button("Ask"):
 
     query = user_input.lower().strip()
+
+    st.write("Processed Query:", query)
 
     intent = "unknown"
 
