@@ -8,9 +8,9 @@
 
 Voice + NLP powered hospital assistant built using FastAPI and Streamlit.
 
----
 
-# 📌 Project Overview
+
+#  Project Overview
 
 Hospital Voice Helpdesk is a kiosk-style AI assistant designed to help patients and visitors inside hospitals using voice and text interaction.
 
@@ -25,9 +25,9 @@ The system provides:
 
 This project was developed as a GenAI + NLP mini project.
 
----
 
-# 🚀 Features
+
+#  Features
 
 | Feature                 | Description                                    |
 | ----------------------- | ---------------------------------------------- |
@@ -40,9 +40,9 @@ This project was developed as a GenAI + NLP mini project.
 | 🌐 Streamlit UI         | Interactive frontend interface                 |
 | ⚡ FastAPI Backend       | Backend API handling                           |
 
----
 
-# 🛠️ Tech Stack
+
+#  Tech Stack
 
 | Technology | Purpose                   |
 | ---------- | ------------------------- |
@@ -53,11 +53,11 @@ This project was developed as a GenAI + NLP mini project.
 | JSON       | Transcript storage        |
 | GitHub     | Version control           |
 
----
 
-# 🏗️ System Architecture
 
-```text
+#  System Architecture
+
+
 +-------------------+
 |   User Voice/Text |
 +-------------------+
@@ -96,9 +96,9 @@ This project was developed as a GenAI + NLP mini project.
 
 ---
 
-# 📂 Project Structure
+#  Project Structure
 
-```text
+
 hospital-voice-helpdesk/
 │
 ├── app.py
@@ -169,7 +169,7 @@ http://localhost:8501
 
 # 🧠 NLP Workflow
 
-```text
+
 User Query
      |
      v
@@ -187,7 +187,7 @@ Response Generation
 
 ---
 
-# 📊 Sample Queries
+ Sample Queries
 
 | User Query        | Detected Intent | Response                    |
 | ----------------- | --------------- | --------------------------- |
@@ -198,31 +198,11 @@ Response Generation
 
 ---
 
-# 🧪 Testing
 
-## Week 1 Testing
-
-| Test Case            | Result   |
-| -------------------- | -------- |
-| Text input handling  | ✅ Passed |
-| API response testing | ✅ Passed |
-| Sample inference     | ✅ Passed |
-| Preprocessing        | ✅ Passed |
 
 ---
 
-## Week 2 Testing
-
-| Test Case        | Result   |
-| ---------------- | -------- |
-| Intent detection | ✅ Passed |
-| Voice input      | ✅ Passed |
-| Boundary cases   | ✅ Passed |
-| Response latency | ✅ Passed |
-
----
-
-# 📸 Demo Workflow
+ Demo Workflow
 
 1. User opens Streamlit application
 2. User enters voice or text query
@@ -233,7 +213,7 @@ Response Generation
 
 ---
 
-# 🔮 Future Enhancements
+ Future Enhancements
 
 * Multilingual support
 * Real hospital database integration
@@ -244,7 +224,7 @@ Response Generation
 
 ---
 
-# 📈 Project Outcome
+ Project Outcome
 
 The Hospital Voice Helpdesk successfully demonstrates:
 
@@ -257,14 +237,11 @@ The Hospital Voice Helpdesk successfully demonstrates:
 
 ---
 
-# 👨‍💻 Developed By
+ Developed By
 
 Jegathish Kumar
 
 ECE Student
 
----
 
-# 📜 License
 
-This project is developed for educational and academic purposes.
