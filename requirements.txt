@@ -1,4 +1,4 @@
 streamlit
+streamlit-mic-recorder
 fastapi
 uvicorn
-streamlit-mic-recorder
